@@ -1,4 +1,5 @@
 #include "GamePlayScene.h"
+#include "Card.h"
 
 USING_NS_CC;
 
@@ -29,15 +30,17 @@ bool GamePlay::init()
     
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    // add "GamePlay" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
-
-    // position the sprite on the center of the screen
-    sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-
-    // add the sprite as a child to this layer
-    this->addChild(sprite, 0);
+    
+    this->WhiteCards = cocos2d::Vector<Card *>{10};
+    
+    for (int i = 0; i < 10; i++)
+    {
+        //add piece
+        Card * card = Card::create("whiteBack.png");
+        card->setPosition(Vec2(origin.x+100*i, visibleSize.height/2 + origin.y));
+        this->WhiteCards.pushBack(card);
+        this->addChild(card);
+    }
     
     return true;
 }

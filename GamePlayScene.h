@@ -2,9 +2,13 @@
 #define __GamePlay_SCENE_H__
 
 #include "cocos2d.h"
+#include "Card.h"
 
 class GamePlay : public cocos2d::Layer
 {
+private:
+    cocos2d::Vector<Card *> WhiteCards;
+    
 public:
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::Scene* createScene();
