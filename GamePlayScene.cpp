@@ -3,6 +3,9 @@
 
 USING_NS_CC;
 
+float CARDSPACE = 150.0f;
+int CARDAMOUNT = 10;
+
 Scene* GamePlay::createScene()
 {
     // 'scene' is an autorelease object
@@ -31,16 +34,35 @@ bool GamePlay::init()
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
-    this->WhiteCards = cocos2d::Vector<Card *>{10};
+    //For scroll view
+    scrollContainer = Layer::create();
+    //scrollContainer->setAnchorPoint(Point::Vec2(-CARDSPACE*CARDAMOUNT/2,0.0f));
     
-    for (int i = 0; i < 10; i++)
+    this->WhiteCards = cocos2d::Vector<Card *>{CARDAMOUNT};
+    
+    for (int i = 0; i < CARDAMOUNT; i++)
     {
         //add piece
         Card * card = Card::create("whiteBack.png");
-        card->setPosition(Vec2(origin.x+100*i, visibleSize.height/2 + origin.y));
+        card->setPosition(Vec2(origin.x+CARDSPACE*(i+0.5), visibleSize.height/4 + origin.y));
+        card->setScale(0.1, 0.1);
+        //card->setAnchorPoint(Vec2(0.5,1));
+        card->setRotation(5*(i-CARDAMOUNT*0.5));
         this->WhiteCards.pushBack(card);
-        this->addChild(card);
+        scrollContainer->addChild(card);
     }
+    
+    scrollContainer->setPosition(Point::ZERO);
+    Size csize = Size(CARDSPACE*CARDAMOUNT, WhiteCards.at(0)->getBoundingBox().size.height);
+    scrollContainer->setContentSize(csize);
+    
+    //SETUP SCROLL VIEW
+    scrollView = ScrollView::create(visibleSize,scrollContainer);
+    scrollView->setPosition(Point::ZERO);
+    scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
+    
+    scrollContainer->retain();
+    addChild(scrollView);
     
     return true;
 }

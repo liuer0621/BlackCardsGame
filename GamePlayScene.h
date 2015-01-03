@@ -3,8 +3,12 @@
 
 #include "cocos2d.h"
 #include "Card.h"
+#include "cocos-ext.h"
 
-class GamePlay : public cocos2d::Layer
+using namespace cocos2d;
+using namespace extension;
+
+class GamePlay : public cocos2d::Layer, public ScrollViewDelegate
 {
 private:
     cocos2d::Vector<Card *> WhiteCards;
@@ -21,6 +25,14 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(GamePlay);
+    
+    //for Scrollview
+    ScrollView *scrollView;
+    Layer *scrollContainer;
+    
+    virtual void scrollViewDidScroll(ScrollView * view){};
+    virtual void scrollViewDidZoom(ScrollView * view){};
+    
 };
 
 #endif // __GamePlay_SCENE_H__
