@@ -45,7 +45,7 @@ bool GamePlay::init()
         //add piece
         Card * card = Card::create("whiteBack.png");
         card->setPosition(Vec2(origin.x+CARDSPACE*(i+0.5), visibleSize.height/4 + origin.y));
-        card->setScale(0.1, 0.1);
+        card->setScale(0.25, 0.25);
         //card->setAnchorPoint(Vec2(0.5,1));
         card->setRotation(5*(i-CARDAMOUNT*0.5));
         this->WhiteCards.pushBack(card);
@@ -57,7 +57,7 @@ bool GamePlay::init()
     scrollContainer->setContentSize(csize);
     
     //SETUP SCROLL VIEW
-    scrollView = ScrollView::create(visibleSize,scrollContainer);
+    scrollView = ScrollView::create(visibleSize, scrollContainer);
     scrollView->setPosition(Point::ZERO);
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
     

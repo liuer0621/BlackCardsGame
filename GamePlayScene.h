@@ -32,6 +32,7 @@ public:
     
     virtual void scrollViewDidScroll(ScrollView * view){};
     virtual void scrollViewDidZoom(ScrollView * view){};
+    void menuCallBack(Ref *sender);
     
 };
 

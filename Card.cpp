@@ -54,7 +54,11 @@ bool Card::init(const std::string &filename)
 
 bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {
-    if(this->getBoundingBox().containsPoint(touch->getLocation()))
+    Vec2 touchPtInNodeSpace = convertToNodeSpace(touch->getLocation());
+    if (touchPtInNodeSpace.x > 0
+        && touchPtInNodeSpace.y > 0
+        && touchPtInNodeSpace.x < getContentSize().width
+        && touchPtInNodeSpace.y < getContentSize().height)
     {
         this->listener->setSwallowTouches(true);
         mMoving = true;
