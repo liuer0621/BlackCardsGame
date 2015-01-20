@@ -52,6 +52,31 @@ bool Card::init(const std::string &filename)
     
 }
 
+void Card::setTargetPosition(Vec2 targetPosition)
+{
+    this->_targetPosition = targetPosition;
+}
+
+bool Card::submitCard()
+{
+    Vec2 currentPosition = this->getPosition();
+    std::cout << "current Position is " << currentPosition.x << "and" << currentPosition.y << "\n";
+    int deltaX, deltaY;
+    deltaX = _targetPosition.x - currentPosition.x;
+    deltaY = _targetPosition.y - currentPosition.y;
+    
+    if((abs(deltaX) < LOCATION_ACCURACY) && (abs(deltaY) < LOCATION_ACCURACY))
+    {
+        Action* moveToTargetPosition = MoveTo::create(0.2, _targetPosition);
+        this->runAction(moveToTargetPosition);
+        std::cout << "submitted";
+        return true;
+    }
+    
+    return false;
+        
+}
+
 bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {
     Vec2 touchPtInNodeSpace = convertToNodeSpace(touch->getLocation());
@@ -81,4 +106,5 @@ void Card::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
 void Card::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
 {
     mMoving = false;
+    this->submitCard();
 }

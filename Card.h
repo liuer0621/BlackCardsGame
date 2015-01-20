@@ -8,8 +8,11 @@
 
 #ifndef __cards__Card__
 #define __cards__Card__
+#define LOCATION_ACCURACY 100
+
 
 #include "cocos2d.h"
+#include <iostream>
 USING_NS_CC;
 
 class Card : public Sprite
@@ -17,6 +20,7 @@ class Card : public Sprite
     private:
         EventListenerTouchOneByOne *listener;
         bool mMoving;
+        Vec2 _targetPosition;
     
     public:
         Card(void);
@@ -25,6 +29,8 @@ class Card : public Sprite
         static Card* create(const std::string &filename);
         virtual bool init(const std::string &filename);
 
+        void setTargetPosition(Vec2 targetPosition);
+        bool submitCard();
     
         bool onTouchBegan(Touch*, Event*);
         void onTouchMoved(Touch*, Event*);
