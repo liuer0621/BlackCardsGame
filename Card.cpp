@@ -59,13 +59,12 @@ void Card::setTargetPosition(Vec2 targetPosition)
 
 bool Card::submitCard()
 {
-    Vec2 currentPosition = this->getPosition();
-    std::cout << "current Position is " << currentPosition.x << "and" << currentPosition.y << "\n";
-    int deltaX, deltaY;
-    deltaX = _targetPosition.x - currentPosition.x;
+    Vec2 currentPosition = convertToWorldSpace(this->getPosition());
+    std::cout << "current Position is " << currentPosition.x << "," << currentPosition.y << "\n";
+    int deltaY;
     deltaY = _targetPosition.y - currentPosition.y;
     
-    if((abs(deltaX) < LOCATION_ACCURACY) && (abs(deltaY) < LOCATION_ACCURACY))
+    if(abs(deltaY) < LOCATION_ACCURACY)
     {
         Action* moveToTargetPosition = MoveTo::create(0.2, _targetPosition);
         this->runAction(moveToTargetPosition);

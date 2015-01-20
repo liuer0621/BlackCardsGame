@@ -65,6 +65,19 @@ bool GamePlay::init()
     scrollContainer->retain();
     addChild(scrollView);
     
+    //bottom layer
+    auto BlackCardLayer = Layer::create();
+    BlackCardLayer->setPosition(Point::ZERO);
+    BlackCardLayer->setContentSize(visibleSize);
+    
+    //create label for black card
+    auto BlackCardLabel = Label::createWithTTF("Black Card Text", "fonts/Marker Felt.ttf", 32);
+    BlackCardLabel->setPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
+    BlackCardLayer->addChild(BlackCardLabel);
+    addChild(BlackCardLayer);
+    
+    
+    
     return true;
 }
 

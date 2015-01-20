@@ -29,6 +29,7 @@ public:
     //for Scrollview
     ScrollView *scrollView;
     Layer *scrollContainer;
+    Layer *BlackCardLayer;
     
     virtual void scrollViewDidScroll(ScrollView * view){};
     virtual void scrollViewDidZoom(ScrollView * view){};
