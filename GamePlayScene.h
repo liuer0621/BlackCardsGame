@@ -11,6 +11,12 @@ using namespace extension;
 class GamePlay : public cocos2d::Layer, public ScrollViewDelegate
 {
 private:
+    // The baseline Y location of the center of the cards
+    float mCardHeight;
+    float mCardYBase;
+    float mCardXSpacing;
+    float mHalfViewWidth;
+    
     cocos2d::Vector<Card *> WhiteCards;
     bool mSnapToPlace;  // When true, we want to scroll the view to predefined places upon finish of user dragging
     

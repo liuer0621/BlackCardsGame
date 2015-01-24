@@ -33,13 +33,25 @@ Card* Card::create(const std::string &filename)
     return pCard;
 }
 
-bool Card::init(const std::string &filename)
+Card* Card::create(Texture2D *texture2D)
 {
-    if(!Sprite::initWithFile(filename))
+    Card* pCard = new Card();
+    
+    if(pCard && pCard->init(texture2D))
     {
-        return false;
+        pCard->autorelease();
+    }
+    else
+    {
+        CC_SAFE_DELETE(pCard);
+        pCard = NULL;
     }
     
+    return pCard;
+}
+
+bool Card::init(void)
+{
     listener = EventListenerTouchOneByOne::create();
     
     listener->onTouchBegan = CC_CALLBACK_2(Card::onTouchBegan, this);
@@ -48,8 +60,31 @@ bool Card::init(const std::string &filename)
     
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
     
+    // TODO: by default on
+    //getTexture()->setAntiAliasTexParameters();
+    
     return true;
     
+}
+
+bool Card::init(const std::string &filename)
+{
+    if(!Sprite::initWithFile(filename))
+    {
+        return false;
+    }
+    
+    return init();
+}
+
+bool Card::init(Texture2D *texture2D)
+{
+    if(!Sprite::initWithTexture(texture2D))
+    {
+        return false;
+    }
+    
+    return init();
 }
 
 void Card::setTargetPosition(Vec2 targetPosition)

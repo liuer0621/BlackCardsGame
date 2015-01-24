@@ -3,7 +3,6 @@
 
 USING_NS_CC;
 
-float CARDSPACE = 100.0f;
 int CARDAMOUNT = 10;
 
 Scene* GamePlay::createScene()
@@ -34,35 +33,47 @@ bool GamePlay::init()
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
-    //For scroll view
+    // Compute constants
+    mHalfViewWidth = visibleSize.width * 0.5f;
+    mCardHeight = visibleSize.height * 0.5f;
+    mCardYBase = mCardHeight * 0.66f;
+    mCardXSpacing = visibleSize.width * 0.2f;
+    
+    // For scroll view
     scrollContainer = Layer::create();
-    //scrollContainer->setAnchorPoint(Point::Vec2(-CARDSPACE*CARDAMOUNT/2,0.0f));
+    
+    // Load card texture
+    // TODO: temporary, as all cards are currently the same
+    Image cardImage;
+    cardImage.initWithImageFile("whiteBack-withShadow.png");
+    Texture2D *cardTexture = new Texture2D;
+    cardTexture->autorelease();
+    cardTexture->initWithImage(&cardImage);
     
     this->WhiteCards = cocos2d::Vector<Card *>{CARDAMOUNT};
     
-    // TODO: comment
-    const float cardSpacing = CARDSPACE,
-                halfViewWidth = visibleSize.width / 2;
+    // TODO: avoid using MACRO
     const int numCards = CARDAMOUNT;
     for (int i = 0; i < numCards; i++)
     {
         //add piece
-        Card * card = Card::create("whiteBack.png");
-        card->setPosition(Vec2(halfViewWidth+cardSpacing*i, visibleSize.height/4));
-        card->setTargetPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
+        Card * card = Card::create(cardTexture);
+        card->setPosition(Vec2(mHalfViewWidth+mCardXSpacing*i, mCardYBase));
+        // TODO: remove
+        //card->setTargetPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
         this->WhiteCards.pushBack(card);
         scrollContainer->addChild(card);
     }
     
     scrollContainer->setPosition(Point::ZERO);
-    Size csize = Size(halfViewWidth*2 + (numCards-1)*cardSpacing, visibleSize.height);
+    Size csize = Size(mHalfViewWidth*2 + (numCards-1)*mCardXSpacing, visibleSize.height);
     scrollContainer->setContentSize(csize);
     
     //SETUP SCROLL VIEW
     scrollView = ScrollView::create(visibleSize, scrollContainer);
     // Move to the center card
     const int centerCard = numCards / 2;
-    scrollView->setContentOffset(Point(-centerCard * cardSpacing, 0.f));
+    scrollView->setContentOffset(Point(-centerCard * mCardXSpacing, 0.f));
     scrollView->setPosition(Point::ZERO);
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
     scrollView->setDelegate(this);
@@ -110,11 +121,11 @@ float unitHeightGaussian(float x, float sigma)
 
 void GamePlay::arrangeCards(void)
 {
-    const Size visibleSize = Director::getInstance()->getVisibleSize();
     const float scrollOffset = scrollView->getContentOffset().x;
-    const float screenCenter = visibleSize.width / 2 - scrollOffset;
-    const float maxYOffset = visibleSize.height * 0.25f;
-    const float sigma = 0.25f * CARDSPACE;
+    // Note scrollOffset is negative
+    const float screenCenter = mHalfViewWidth - scrollOffset;
+    const float maxYOffset = mCardHeight * 0.5f;
+    const float sigma = 0.25f * mCardXSpacing;
     
     for (int i = 0; i < WhiteCards.size(); ++i) {
         Card *card = WhiteCards.at(i);
@@ -126,7 +137,7 @@ void GamePlay::arrangeCards(void)
         
         // Compute Y offset
         const float yOffset = maxYOffset * factor;
-        card->setPositionY(visibleSize.height/4 + yOffset);
+        card->setPositionY(mCardYBase + yOffset);
         
         // Compute rotation
         const float rotation = (1-factor) * (5*(i-CARDAMOUNT*0.5f));
@@ -146,7 +157,7 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
         // and we shouldn't do anything
         if (offset.x > minOffset.x && offset.x < maxOffset.x) {
             // Find the closest offset centered on the cards
-            offset.x = (int)(offset.x / CARDSPACE - 0.5f) * CARDSPACE;
+            offset.x = floorf(offset.x / mCardXSpacing + 0.5f) * mCardXSpacing;
             view->setContentOffset(offset, true);
         }
         mSnapToPlace = false;

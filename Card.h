@@ -27,7 +27,11 @@ class Card : public Sprite
         virtual ~Card(void);
     
         static Card* create(const std::string &filename);
+        static Card* create(Texture2D *texture2D);
+    
+        virtual bool init(void);
         virtual bool init(const std::string &filename);
+        virtual bool init(Texture2D *texture2D);
 
         void setTargetPosition(Vec2 targetPosition);
         bool submitCard();
@@ -35,7 +39,6 @@ class Card : public Sprite
         bool onTouchBegan(Touch*, Event*);
         void onTouchMoved(Touch*, Event*);
         void onTouchEnded(Touch*, Event*);
-    
 };
 
 
