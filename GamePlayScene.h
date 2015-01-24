@@ -12,6 +12,7 @@ class GamePlay : public cocos2d::Layer, public ScrollViewDelegate
 {
 private:
     cocos2d::Vector<Card *> WhiteCards;
+    bool mSnapToPlace;  // When true, we want to scroll the view to predefined places upon finish of user dragging
     
     void arrangeCards(void);
     

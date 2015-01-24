@@ -49,9 +49,7 @@ bool GamePlay::init()
         //add piece
         Card * card = Card::create("whiteBack.png");
         card->setPosition(Vec2(halfViewWidth+cardSpacing*i, visibleSize.height/4));
-        //card->setAnchorPoint(Vec2(0.5,1));
         card->setTargetPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
-        card->setRotation(5*(i-CARDAMOUNT*0.5));
         this->WhiteCards.pushBack(card);
         scrollContainer->addChild(card);
     }
@@ -83,6 +81,7 @@ bool GamePlay::init()
     addChild(BlackCardLayer);
     
     arrangeCards();
+    mSnapToPlace = false;
     
     return true;
 }
@@ -103,21 +102,60 @@ void GamePlay::menuCloseCallback(Ref* pSender)
 }
 
 
+float unitHeightGaussian(float x, float sigma)
+{
+    return expf(-x*x/(2*sigma*sigma));
+}
+
+
 void GamePlay::arrangeCards(void)
 {
     const Size visibleSize = Director::getInstance()->getVisibleSize();
     const float scrollOffset = scrollView->getContentOffset().x;
     const float screenCenter = visibleSize.width / 2 - scrollOffset;
+    const float maxYOffset = visibleSize.height * 0.25f;
+    const float sigma = 0.25f * CARDSPACE;
     
     for (int i = 0; i < WhiteCards.size(); ++i) {
         Card *card = WhiteCards.at(i);
         float cardX = card->getPositionX();
-        card->setPositionY(visibleSize.height/4 + std::max(0.f, 200-abs(cardX - screenCenter)*0.5f));
+        
+        // factor: how close the card is to the center of the screen
+        // 1 means right at the center. Closer to 0 when further away
+        const float factor = unitHeightGaussian(cardX - screenCenter, sigma);
+        
+        // Compute Y offset
+        const float yOffset = maxYOffset * factor;
+        card->setPositionY(visibleSize.height/4 + yOffset);
+        
+        // Compute rotation
+        const float rotation = (1-factor) * (5*(i-CARDAMOUNT*0.5f));
+        card->setRotation(rotation);
     }
 }
 
 
 void GamePlay::scrollViewDidScroll(ScrollView * view)
 {
+    if (mSnapToPlace && !view->isDragging()) {
+        // When user finishes dragging, and we want to snap the scrollview to predefined places
+        Vec2 offset = view->getContentOffset();
+        Vec2 maxOffset = view->maxContainerOffset(),
+             minOffset = view->minContainerOffset();
+        // Check if the current offset is within the min/max boundary; if not, ScrollView will handle that by bounce
+        // and we shouldn't do anything
+        if (offset.x > minOffset.x && offset.x < maxOffset.x) {
+            // Find the closest offset centered on the cards
+            offset.x = (int)(offset.x / CARDSPACE - 0.5f) * CARDSPACE;
+            view->setContentOffset(offset, true);
+        }
+        mSnapToPlace = false;
+    }
+    
+    if(view->isDragging()) {
+        // Whenever the user is dragging, we turn on "snap to place" at the end of draggin
+        mSnapToPlace = true;
+    }
+    
     arrangeCards();
 }

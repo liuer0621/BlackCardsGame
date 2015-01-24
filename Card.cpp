@@ -80,7 +80,8 @@ bool Card::submitCard()
 
 bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {
-    Vec2 touchPtInNodeSpace = convertToNodeSpace(touch->getLocation());
+    // TODO: temporarily disable
+    /*Vec2 touchPtInNodeSpace = convertToNodeSpace(touch->getLocation());
     if (touchPtInNodeSpace.x > 0
         && touchPtInNodeSpace.y > 0
         && touchPtInNodeSpace.x < getContentSize().width
@@ -92,7 +93,7 @@ bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
     else
     {
         this->listener->setSwallowTouches(false);
-    }
+    }*/
     
     return true;
 }
@@ -107,5 +108,6 @@ void Card::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
 void Card::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
 {
     mMoving = false;
-    this->submitCard();
+    // TODO: temporarily disable
+    //this->submitCard();
 }
