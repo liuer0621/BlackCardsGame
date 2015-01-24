@@ -3,7 +3,7 @@
 
 USING_NS_CC;
 
-float CARDSPACE = 150.0f;
+float CARDSPACE = 100.0f;
 int CARDAMOUNT = 10;
 
 Scene* GamePlay::createScene()
@@ -40,12 +40,15 @@ bool GamePlay::init()
     
     this->WhiteCards = cocos2d::Vector<Card *>{CARDAMOUNT};
     
-    for (int i = 0; i < CARDAMOUNT; i++)
+    // TODO: comment
+    const float cardSpacing = CARDSPACE,
+                halfViewWidth = visibleSize.width / 2;
+    const int numCards = CARDAMOUNT;
+    for (int i = 0; i < numCards; i++)
     {
         //add piece
         Card * card = Card::create("whiteBack.png");
-        card->setPosition(Vec2(origin.x+CARDSPACE*(i+0.5), visibleSize.height/4 + origin.y));
-        card->setScale(0.5, 0.5);
+        card->setPosition(Vec2(halfViewWidth+cardSpacing*i, visibleSize.height/4));
         //card->setAnchorPoint(Vec2(0.5,1));
         card->setTargetPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
         card->setRotation(5*(i-CARDAMOUNT*0.5));
@@ -54,15 +57,18 @@ bool GamePlay::init()
     }
     
     scrollContainer->setPosition(Point::ZERO);
-    Size csize = Size(CARDSPACE*CARDAMOUNT, WhiteCards.at(0)->getBoundingBox().size.height);
+    Size csize = Size(halfViewWidth*2 + (numCards-1)*cardSpacing, visibleSize.height);
     scrollContainer->setContentSize(csize);
     
     //SETUP SCROLL VIEW
     scrollView = ScrollView::create(visibleSize, scrollContainer);
+    // Move to the center card
+    const int centerCard = numCards / 2;
+    scrollView->setContentOffset(Point(-centerCard * cardSpacing, 0.f));
     scrollView->setPosition(Point::ZERO);
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
+    scrollView->setDelegate(this);
     
-    scrollContainer->retain();
     addChild(scrollView);
     
     //bottom layer
@@ -76,7 +82,7 @@ bool GamePlay::init()
     BlackCardLayer->addChild(BlackCardLabel);
     addChild(BlackCardLayer);
     
-    
+    arrangeCards();
     
     return true;
 }
@@ -94,4 +100,24 @@ void GamePlay::menuCloseCallback(Ref* pSender)
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
 #endif
+}
+
+
+void GamePlay::arrangeCards(void)
+{
+    const Size visibleSize = Director::getInstance()->getVisibleSize();
+    const float scrollOffset = scrollView->getContentOffset().x;
+    const float screenCenter = visibleSize.width / 2 - scrollOffset;
+    
+    for (int i = 0; i < WhiteCards.size(); ++i) {
+        Card *card = WhiteCards.at(i);
+        float cardX = card->getPositionX();
+        card->setPositionY(visibleSize.height/4 + std::max(0.f, 200-abs(cardX - screenCenter)*0.5f));
+    }
+}
+
+
+void GamePlay::scrollViewDidScroll(ScrollView * view)
+{
+    arrangeCards();
 }

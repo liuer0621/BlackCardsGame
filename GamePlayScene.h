@@ -13,6 +13,8 @@ class GamePlay : public cocos2d::Layer, public ScrollViewDelegate
 private:
     cocos2d::Vector<Card *> WhiteCards;
     
+    void arrangeCards(void);
+    
 public:
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::Scene* createScene();
@@ -31,7 +33,7 @@ public:
     Layer *scrollContainer;
     Layer *BlackCardLayer;
     
-    virtual void scrollViewDidScroll(ScrollView * view){};
+    virtual void scrollViewDidScroll(ScrollView * view);
     virtual void scrollViewDidZoom(ScrollView * view){};
     void menuCallBack(Ref *sender);
     

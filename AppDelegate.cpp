@@ -23,6 +23,9 @@ void AppDelegate::initGLContextAttrs()
 }
 
 bool AppDelegate::applicationDidFinishLaunching() {
+    // TODO: design resolution: currently using iPhone 6
+    Size designResolutionSize(750, 1334);
+    
     // initialize director
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
@@ -30,6 +33,13 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview = GLViewImpl::create("My Game");
         director->setOpenGLView(glview);
     }
+    
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+    Size winResolutionSize = designResolutionSize * 0.6;
+    glview->setFrameSize(winResolutionSize.width, winResolutionSize.height);
+#endif
+    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, kResolutionNoBorder);
+    director->setContentScaleFactor(1.f);   // TODO: what to use?
 
     // turn on display FPS
     director->setDisplayStats(true);
