@@ -35,10 +35,13 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
     
 #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
-    Size winResolutionSize = designResolutionSize * 0.6;
+    Size winResolutionSize = designResolutionSize * 0.6f;
     glview->setFrameSize(winResolutionSize.width, winResolutionSize.height);
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+	Size winResolutionSize = designResolutionSize * 0.5f;
+	glview->setFrameSize(winResolutionSize.width, winResolutionSize.height);
 #endif
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, kResolutionNoBorder);
+	glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
     director->setContentScaleFactor(1.f);   // TODO: what to use?
 
     // turn on display FPS
