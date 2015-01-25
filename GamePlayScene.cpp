@@ -65,7 +65,6 @@ bool GamePlay::init()
     {
         //add piece
         Card * card = Card::create(cardTexture);
-        card->setPosition(Vec2(mHalfViewWidth+mCardXSpacing*i, mCardYBase));
         card->setScale(mCardScaling, mCardScaling);
         card->setDelegate(this);
         this->WhiteCards.pushBack(card);
@@ -98,6 +97,7 @@ bool GamePlay::init()
     
     arrangeCards();
     mSnapToPlace = false;
+    mCardChosen = false;
     
     return true;
 }
@@ -138,7 +138,10 @@ void GamePlay::arrangeCards(void)
     
     for (int i = 0; i < WhiteCards.size(); ++i) {
         Card *card = WhiteCards.at(i);
-        float cardX = card->getPositionX();
+        float cardX = mHalfViewWidth + mCardXSpacing * i;
+        
+        // Stop all actions on the card
+        card->stopAllActions();
         
         // factor: how close the card is to the center of the screen
         // 1 means right at the center. Closer to 0 when further away
@@ -146,7 +149,7 @@ void GamePlay::arrangeCards(void)
         
         // Compute Y offset
         const float yOffset = mCardMaxYOffset * factor;
-        card->setPositionY(mCardYBase + yOffset);
+        card->setPosition(Vec2(cardX, mCardYBase + yOffset));
         
         // Compute rotation
         const float rotation = (1-factor) * (5*(i-CARDAMOUNT*0.5f));
@@ -171,7 +174,7 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
         mSnapToPlace = false;
     }
     
-    if(view->isDragging()) {
+    if(view->isDragging() && cardsAreDraggable()) {
         // Whenever the user is dragging, we turn on "snap to place" at the end of draggin
         mSnapToPlace = true;
     }
@@ -185,11 +188,19 @@ void GamePlay::cardDidSubmit(Card *card)
     //       to convert it to world space, and then convert it to GamePlay's space
     Vec2 pt = convertToNodeSpace(scrollContainer->convertToWorldSpace(card->getPosition()));
     if (mSubmitRegion.containsPoint(pt)) {
-        card->runAction(FadeOut::create(0.2));
+        card->fadeOut();
+    } else {
+        card->pullBack();
     }
 }
 
 bool GamePlay::cardIsMovable(const Card *card)
 {
+    // TODO: we should make sure card is not movable when there is scrolling animation
     return (card == WhiteCards.at(mCurrentCardIndex));
+}
+
+bool GamePlay::cardsAreDraggable(void)
+{
+    return !mCardChosen;
 }

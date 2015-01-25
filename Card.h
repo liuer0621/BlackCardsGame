@@ -28,7 +28,10 @@ class Card : public Sprite
 {
 private:
     EventListenerTouchOneByOne *listener;
+    
     bool mMoving;
+    Vec2 mMovingStartPt;
+    
     CardDelegate *mDelegate;
 
 public:
@@ -49,6 +52,9 @@ public:
     void onTouchEnded(Touch*, Event*);
     
     void setDelegate(CardDelegate *delegate) { mDelegate = delegate; }
+    
+    void fadeOut(void);
+    void pullBack(void);
 };
 
 

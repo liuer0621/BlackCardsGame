@@ -11,19 +11,24 @@ using namespace extension;
 class GamePlay : public cocos2d::Layer, public ScrollViewDelegate, public CardDelegate
 {
 private:
-    // The baseline Y location of the center of the cards
+    // Constants
     float mCardHeight, mCardScaling;
     float mCardYBase, mCardMaxYOffset;
     float mCardXSpacing;
     float mHalfViewWidth;
     Rect mSubmitRegion;
     
-    cocos2d::Vector<Card *> WhiteCards;
+    // States
+    bool mCardChosen;
     bool mSnapToPlace;  // When true, we want to scroll the view to predefined places upon finish of user dragging
     int mCurrentCardIndex;
     
+    cocos2d::Vector<Card *> WhiteCards;
+    
     void moveToCard(int index, bool animated);
     void arrangeCards(void);
+    
+    bool cardsAreDraggable(void);
     
 public:
     // there's no 'id' in cpp, so we recommend returning the class instance pointer

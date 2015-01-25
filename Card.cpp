@@ -116,10 +116,12 @@ bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
         && touchPtInNodeSpace.y > 0
         && touchPtInNodeSpace.x < getContentSize().width
         && touchPtInNodeSpace.y < getContentSize().height
+        && getNumberOfRunningActions() == 0
         && (mDelegate && mDelegate->cardIsMovable(this)))
     {
         this->listener->setSwallowTouches(true);
         mMoving = true;
+        mMovingStartPt = getPosition();
     }
     else
     {
@@ -139,10 +141,23 @@ void Card::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
 void Card::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
 {
     if (mMoving) {
-        mMoving = false;
-        
         if (mDelegate) {
             mDelegate->cardDidSubmit(this);
         }
+        
+        mMoving = false;
+    }
+}
+
+void Card::fadeOut(void)
+{
+    runAction(FadeOut::create(0.2f));
+}
+
+void Card::pullBack(void)
+{
+    // Note: mMovingStartPt is only meaningful if the card is being moved
+    if (mMoving) {
+        runAction(MoveTo::create(0.1f, mMovingStartPt));
     }
 }
