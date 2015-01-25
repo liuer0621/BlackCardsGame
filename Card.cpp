@@ -8,7 +8,7 @@
 
 #include "Card.h"
 
-Card::Card(void) : mMoving(false)
+Card::Card(void) : mMoving(false), mDelegate(nullptr)
 {
 }
 
@@ -87,12 +87,8 @@ bool Card::init(Texture2D *texture2D)
     return init();
 }
 
-void Card::setTargetPosition(Vec2 targetPosition)
-{
-    this->_targetPosition = targetPosition;
-}
-
-bool Card::submitCard()
+// TODO: remove
+/*bool Card::submitCard()
 {
     Vec2 currentPosition = convertToWorldSpace(this->getPosition());
     // TODO
@@ -110,17 +106,17 @@ bool Card::submitCard()
     }
     
     return false;
-        
-}
+ 
+}*/
 
 bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
 {
-    // TODO: temporarily disable
-    /*Vec2 touchPtInNodeSpace = convertToNodeSpace(touch->getLocation());
+    Vec2 touchPtInNodeSpace = convertToNodeSpace(touch->getLocation());
     if (touchPtInNodeSpace.x > 0
         && touchPtInNodeSpace.y > 0
         && touchPtInNodeSpace.x < getContentSize().width
-        && touchPtInNodeSpace.y < getContentSize().height)
+        && touchPtInNodeSpace.y < getContentSize().height
+        && (mDelegate && mDelegate->cardIsMovable(this)))
     {
         this->listener->setSwallowTouches(true);
         mMoving = true;
@@ -128,7 +124,7 @@ bool Card::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event)
     else
     {
         this->listener->setSwallowTouches(false);
-    }*/
+    }
     
     return true;
 }
@@ -142,7 +138,11 @@ void Card::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *event)
 
 void Card::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *event)
 {
-    mMoving = false;
-    // TODO: temporarily disable
-    //this->submitCard();
+    if (mMoving) {
+        mMoving = false;
+        
+        if (mDelegate) {
+            mDelegate->cardDidSubmit(this);
+        }
+    }
 }

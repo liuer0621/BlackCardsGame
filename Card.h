@@ -15,33 +15,41 @@
 #include <iostream>
 USING_NS_CC;
 
-class Card : public Sprite
-{
-    private:
-        EventListenerTouchOneByOne *listener;
-        bool mMoving;
-        Vec2 _targetPosition;
-    
-    public:
-        Card(void);
-        virtual ~Card(void);
-    
-        static Card* create(const std::string &filename);
-        static Card* create(Texture2D *texture2D);
-    
-        virtual bool init(void);
-        virtual bool init(const std::string &filename);
-        virtual bool init(Texture2D *texture2D);
+class Card;
 
-        void setTargetPosition(Vec2 targetPosition);
-        bool submitCard();
-    
-        bool onTouchBegan(Touch*, Event*);
-        void onTouchMoved(Touch*, Event*);
-        void onTouchEnded(Touch*, Event*);
+class CardDelegate
+{
+public:
+    virtual void cardDidSubmit(Card *card) {}
+    virtual bool cardIsMovable(const Card *card) {}
 };
 
+class Card : public Sprite
+{
+private:
+    EventListenerTouchOneByOne *listener;
+    bool mMoving;
+    CardDelegate *mDelegate;
 
+public:
+    Card(void);
+    virtual ~Card(void);
+
+    static Card* create(const std::string &filename);
+    static Card* create(Texture2D *texture2D);
+
+    virtual bool init(void);
+    virtual bool init(const std::string &filename);
+    virtual bool init(Texture2D *texture2D);
+
+    bool submitCard();
+
+    bool onTouchBegan(Touch*, Event*);
+    void onTouchMoved(Touch*, Event*);
+    void onTouchEnded(Touch*, Event*);
+    
+    void setDelegate(CardDelegate *delegate) { mDelegate = delegate; }
+};
 
 
 #endif /* defined(__cards__Card__) */

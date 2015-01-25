@@ -42,7 +42,6 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	glview->setFrameSize(winResolutionSize.width, winResolutionSize.height);
 #endif
 	glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
-    director->setContentScaleFactor(1.f);   // TODO: what to use?
 
     // turn on display FPS
     director->setDisplayStats(true);

@@ -33,15 +33,6 @@ bool GamePlay::init()
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
-    // Compute constants
-    mHalfViewWidth = visibleSize.width * 0.5f;
-    mCardHeight = visibleSize.height * 0.5f;
-    mCardYBase = mCardHeight * 0.66f;
-    mCardXSpacing = visibleSize.width * 0.2f;
-    
-    // For scroll view
-    scrollContainer = Layer::create();
-    
     // Load card texture
     // TODO: temporary, as all cards are currently the same
     Image cardImage;
@@ -49,6 +40,22 @@ bool GamePlay::init()
     Texture2D *cardTexture = new Texture2D;
     cardTexture->autorelease();
     cardTexture->initWithImage(&cardImage);
+    
+    // Compute constants
+    mHalfViewWidth = visibleSize.width * 0.5f;
+    mCardHeight = visibleSize.height * 0.5f;
+    mCardScaling = mCardHeight / cardTexture->getPixelsHigh();
+    mCardMaxYOffset = mCardHeight * 0.7f;
+    mCardYBase = mCardHeight * (0.66f - 0.5f);
+    mCardXSpacing = visibleSize.width * 0.2f;
+    
+    // Submit region
+    float submitRegionHeight = visibleSize.height - 0.5f * mCardHeight - mCardMaxYOffset - mCardYBase;
+    mSubmitRegion.setRect(0, visibleSize.height - submitRegionHeight,
+                          visibleSize.width, submitRegionHeight);
+    
+    // For scroll view
+    scrollContainer = Layer::create();
     
     this->WhiteCards = cocos2d::Vector<Card *>{CARDAMOUNT};
     
@@ -59,8 +66,8 @@ bool GamePlay::init()
         //add piece
         Card * card = Card::create(cardTexture);
         card->setPosition(Vec2(mHalfViewWidth+mCardXSpacing*i, mCardYBase));
-        // TODO: remove
-        //card->setTargetPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
+        card->setScale(mCardScaling, mCardScaling);
+        card->setDelegate(this);
         this->WhiteCards.pushBack(card);
         scrollContainer->addChild(card);
     }
@@ -71,9 +78,7 @@ bool GamePlay::init()
     
     //SETUP SCROLL VIEW
     scrollView = ScrollView::create(visibleSize, scrollContainer);
-    // Move to the center card
-    const int centerCard = numCards / 2;
-    scrollView->setContentOffset(Point(-centerCard * mCardXSpacing, 0.f));
+    moveToCard(numCards/2, false);
     scrollView->setPosition(Point::ZERO);
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
     scrollView->setDelegate(this);
@@ -87,7 +92,7 @@ bool GamePlay::init()
     
     //create label for black card
     auto BlackCardLabel = Label::createWithTTF("Black Card Text", "fonts/Marker Felt.ttf", 32);
-    BlackCardLabel->setPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.75));
+    BlackCardLabel->setPosition(Vec2(mSubmitRegion.getMidX(), mSubmitRegion.getMidY()));
     BlackCardLayer->addChild(BlackCardLabel);
     addChild(BlackCardLayer);
     
@@ -118,13 +123,17 @@ float unitHeightGaussian(float x, float sigma)
     return expf(-x*x/(2*sigma*sigma));
 }
 
+void GamePlay::moveToCard(int index, bool animated)
+{
+    mCurrentCardIndex = index;
+    scrollView->setContentOffset(Point(-index * mCardXSpacing, 0.f), animated);
+}
 
 void GamePlay::arrangeCards(void)
 {
     const float scrollOffset = scrollView->getContentOffset().x;
     // Note scrollOffset is negative
     const float screenCenter = mHalfViewWidth - scrollOffset;
-    const float maxYOffset = mCardHeight * 0.5f;
     const float sigma = 0.25f * mCardXSpacing;
     
     for (int i = 0; i < WhiteCards.size(); ++i) {
@@ -136,7 +145,7 @@ void GamePlay::arrangeCards(void)
         const float factor = unitHeightGaussian(cardX - screenCenter, sigma);
         
         // Compute Y offset
-        const float yOffset = maxYOffset * factor;
+        const float yOffset = mCardMaxYOffset * factor;
         card->setPositionY(mCardYBase + yOffset);
         
         // Compute rotation
@@ -156,9 +165,8 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
         // Check if the current offset is within the min/max boundary; if not, ScrollView will handle that by bounce
         // and we shouldn't do anything
         if (offset.x > minOffset.x && offset.x < maxOffset.x) {
-            // Find the closest offset centered on the cards
-            offset.x = floorf(offset.x / mCardXSpacing + 0.5f) * mCardXSpacing;
-            view->setContentOffset(offset, true);
+            // Move to the closest card. (Note: offset is negative)
+            moveToCard(-floorf(offset.x / mCardXSpacing + 0.5f), true);
         }
         mSnapToPlace = false;
     }
@@ -169,4 +177,19 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
     }
     
     arrangeCards();
+}
+
+void GamePlay::cardDidSubmit(Card *card)
+{
+    // Note: getPosition() returns position in parent's space, so we use parent's convertToWorldSpace()
+    //       to convert it to world space, and then convert it to GamePlay's space
+    Vec2 pt = convertToNodeSpace(scrollContainer->convertToWorldSpace(card->getPosition()));
+    if (mSubmitRegion.containsPoint(pt)) {
+        card->runAction(FadeOut::create(0.2));
+    }
+}
+
+bool GamePlay::cardIsMovable(const Card *card)
+{
+    return (card == WhiteCards.at(mCurrentCardIndex));
 }

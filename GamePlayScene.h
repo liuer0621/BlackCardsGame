@@ -8,18 +8,21 @@
 using namespace cocos2d;
 using namespace extension;
 
-class GamePlay : public cocos2d::Layer, public ScrollViewDelegate
+class GamePlay : public cocos2d::Layer, public ScrollViewDelegate, public CardDelegate
 {
 private:
     // The baseline Y location of the center of the cards
-    float mCardHeight;
-    float mCardYBase;
+    float mCardHeight, mCardScaling;
+    float mCardYBase, mCardMaxYOffset;
     float mCardXSpacing;
     float mHalfViewWidth;
+    Rect mSubmitRegion;
     
     cocos2d::Vector<Card *> WhiteCards;
     bool mSnapToPlace;  // When true, we want to scroll the view to predefined places upon finish of user dragging
+    int mCurrentCardIndex;
     
+    void moveToCard(int index, bool animated);
     void arrangeCards(void);
     
 public:
@@ -42,8 +45,11 @@ public:
     
     virtual void scrollViewDidScroll(ScrollView * view);
     virtual void scrollViewDidZoom(ScrollView * view){};
-    void menuCallBack(Ref *sender);
     
+    void cardDidSubmit(Card *card);
+    bool cardIsMovable(const Card *card);
+    
+    void menuCallBack(Ref *sender);
 };
 
 #endif // __GamePlay_SCENE_H__
