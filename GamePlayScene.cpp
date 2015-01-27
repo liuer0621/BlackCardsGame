@@ -81,6 +81,7 @@ bool GamePlay::init()
     scrollView->setPosition(Point::ZERO);
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
     scrollView->setDelegate(this);
+    scrollView->setContentSize(csize);  // This seems necessary for kinetic scrolling to work
     
     addChild(scrollView);
     
@@ -160,6 +161,10 @@ void GamePlay::arrangeCards(void)
 
 void GamePlay::scrollViewDidScroll(ScrollView * view)
 {
+    // TODO
+    //log("scrollViewDidScroll, %d, %d %d", mSnapToPlace, view->isDragging(),
+    //    view->isScheduled(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling)));
+    
     if (mSnapToPlace && !view->isDragging()) {
         // When user finishes dragging, and we want to snap the scrollview to predefined places
         Vec2 offset = view->getContentOffset();
