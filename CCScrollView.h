@@ -192,6 +192,7 @@ public:
     void setTouchEnabled(bool enabled);
 	bool isTouchEnabled() const;
     bool isDragging() const {return _dragging;}
+    bool isAnimating();
     bool isTouchMoved() const { return _touchMoved; }
     bool isBounceable() const { return _bounceable; }
     void setBounceable(bool bBounceable) { _bounceable = bBounceable; }
@@ -308,6 +309,11 @@ protected:
      * If YES, the view is being dragged.
      */
     bool _dragging;
+    
+    /**
+     * If YES, the view is being animated: either deaccelerating or moving to a specified target.
+     */
+    bool _animating;
 
     /**
      * Content offset. Note that left-bottom point is the origin

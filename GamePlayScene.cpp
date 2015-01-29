@@ -162,8 +162,7 @@ void GamePlay::arrangeCards(void)
 void GamePlay::scrollViewDidScroll(ScrollView * view)
 {
     // TODO
-    //log("scrollViewDidScroll, %d, %d %d", mSnapToPlace, view->isDragging(),
-    //    view->isScheduled(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling)));
+    log("scrollViewDidScroll, %d %d %f", view->isDragging(), view->isAnimating(), view->getContentOffset().x);
     
     if (mSnapToPlace && !view->isDragging()) {
         // When user finishes dragging, and we want to snap the scrollview to predefined places

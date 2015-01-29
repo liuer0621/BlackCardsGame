@@ -55,6 +55,7 @@ ScrollView::ScrollView()
 : _delegate(nullptr)
 , _direction(Direction::BOTH)
 , _dragging(false)
+, _animating(false)
 , _container(nullptr)
 , _touchMoved(false)
 , _bounceable(false)
@@ -201,6 +202,7 @@ void ScrollView::setTouchEnabled(bool enabled)
         _dragging = false;
         _touchMoved = false;
         _touches.clear();
+        _animating = false;
     }
 }
 
@@ -238,6 +240,7 @@ void ScrollView::setContentOffsetInDuration(Vec2 offset, float dt)
     expire = CallFuncN::create(CC_CALLBACK_1(ScrollView::stoppedAnimatedScroll,this));
     _container->runAction(Sequence::create(scroll, expire, nullptr));
     this->schedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
+    _animating = true;
 }
 
 Vec2 ScrollView::getContentOffset()
@@ -301,6 +304,8 @@ void ScrollView::setZoomScaleInDuration(float s, float dt)
             ActionTween *scaleAction;
             scaleAction = ActionTween::create(dt, "zoomScale", _container->getScale(), s);
             this->runAction(scaleAction);
+            // TODO: ideally zooming animation should also set _animating to true; however, currently I have no way
+            //       to know when this action is ending
         }
     }
     else
@@ -433,12 +438,16 @@ void ScrollView::deaccelerateScrolling(float dt)
         newX >= maxInset.x || newX <= minInset.x)
     {
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
+        log("deaccelerateScrolling: _animating = false");
+        _animating = false;
         this->relocateContainer(true);
     }
 }
 
 void ScrollView::stoppedAnimatedScroll(Node * node)
 {
+    log("stoppedAnimatedScroll: _animating = false");
+    _animating = false;
     this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
     // After the animation stopped, "scrollViewDidScroll" should be invoked, this could fix the bug of lack of tableview cells.
     if (_delegate != nullptr)
@@ -451,6 +460,8 @@ void ScrollView::performedAnimatedScroll(float dt)
 {
     if (_dragging)
     {
+        log("performedAnimatedScroll: _animating = false");
+        _animating = false;
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
         return;
     }
@@ -843,4 +854,15 @@ Rect ScrollView::getViewRect()
 
     return Rect(screenPos.x, screenPos.y, _viewSize.width*scaleX, _viewSize.height*scaleY);
 }
+
+bool ScrollView::isAnimating()
+{
+    if (isScheduled(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling))
+            || isScheduled(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll))) {
+        // We still need some way to see if we are zooming
+        return true;
+    }
+    return false;
+}
+
 NS_CC_EXT_END
