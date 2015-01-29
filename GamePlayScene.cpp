@@ -164,7 +164,7 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
     // TODO
     log("scrollViewDidScroll, %d %d %f", view->isDragging(), view->isAnimating(), view->getContentOffset().x);
     
-    if (mSnapToPlace && !view->isDragging()) {
+    if (mSnapToPlace && !view->isDragging() && !view->isAnimating()) {
         // When user finishes dragging, and we want to snap the scrollview to predefined places
         Vec2 offset = view->getContentOffset();
         Vec2 maxOffset = view->maxContainerOffset(),

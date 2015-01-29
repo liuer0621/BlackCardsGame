@@ -21,7 +21,7 @@ class CardDelegate
 {
 public:
     virtual void cardDidSubmit(Card *card) {}
-    virtual bool cardIsMovable(const Card *card) {}
+	virtual bool cardIsMovable(const Card *card) { return true; }
 };
 
 class Card : public Sprite

@@ -36,8 +36,9 @@
 
 NS_CC_EXT_BEGIN
 
-#define SCROLL_DEACCEL_RATE  0.95f
-#define SCROLL_DEACCEL_DIST  1.0f
+#define SCROLL_DEACCEL_RATE			0.95f
+#define SCROLL_DEACCEL_DIST			1.0f
+#define SCROLL_DEACCEL_THRESHOLD	5.0f	// This is necessary when the display resolution is small, because the smallest mouse movement might be large
 #define BOUNCE_DURATION      0.15f
 #define INSET_RATIO          0.2f
 #define MOVE_INCH            7.0f/160.0f
@@ -208,6 +209,9 @@ void ScrollView::setTouchEnabled(bool enabled)
 
 void ScrollView::setContentOffset(Vec2 offset, bool animated/* = false*/)
 {
+	// TODO
+	log("setContentOffset: animated = %d", animated);
+
     if (animated)
     { //animate scrolling
         this->setContentOffsetInDuration(offset, BOUNCE_DURATION);
@@ -404,6 +408,9 @@ Vec2 ScrollView::minContainerOffset()
 
 void ScrollView::deaccelerateScrolling(float dt)
 {
+	// TODO
+	log("deaccelerateScrolling: _scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
+
     if (_dragging)
     {
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
@@ -430,7 +437,7 @@ void ScrollView::deaccelerateScrolling(float dt)
     newY = _container->getPosition().y;
     
     _scrollDistance     = _scrollDistance * SCROLL_DEACCEL_RATE;
-    this->setContentOffset(Vec2(newX,newY));
+	this->setContentOffset(Vec2(newX, newY));
     
     if ((fabsf(_scrollDistance.x) <= SCROLL_DEACCEL_DIST &&
          fabsf(_scrollDistance.y) <= SCROLL_DEACCEL_DIST) ||
@@ -440,12 +447,19 @@ void ScrollView::deaccelerateScrolling(float dt)
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
         log("deaccelerateScrolling: _animating = false");
         _animating = false;
-        this->relocateContainer(true);
-    }
+
+		// After the animation stopped, "scrollViewDidScroll" should be invoked
+		if (_delegate != nullptr) {
+			_delegate->scrollViewDidScroll(this);
+		}
+		
+        this->relocateContainer(true);	
+	}
 }
 
 void ScrollView::stoppedAnimatedScroll(Node * node)
 {
+	// TODO
     log("stoppedAnimatedScroll: _animating = false");
     _animating = false;
     this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
@@ -460,6 +474,7 @@ void ScrollView::performedAnimatedScroll(float dt)
 {
     if (_dragging)
     {
+		// TODO
         log("performedAnimatedScroll: _animating = false");
         _animating = false;
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
@@ -649,6 +664,9 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
 
 bool ScrollView::onTouchBegan(Touch* touch, Event* event)
 {
+	// TODO
+	log("onTouchBegan");
+
     if (!this->isVisible() || !this->hasVisibleParents())
     {
         return false;
@@ -692,6 +710,9 @@ bool ScrollView::onTouchBegan(Touch* touch, Event* event)
 
 void ScrollView::onTouchMoved(Touch* touch, Event* event)
 {
+	// TODO
+	log("onTouchMoved");
+
     if (!this->isVisible())
     {
         return;
@@ -775,6 +796,9 @@ void ScrollView::onTouchMoved(Touch* touch, Event* event)
 
                 _scrollDistance = moveDistance;
                 this->setContentOffset(Vec2(newX, newY));
+
+				// TODO
+				log("scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
             }
         }
         else if (_touches.size() == 2 && !_dragging)
@@ -788,6 +812,9 @@ void ScrollView::onTouchMoved(Touch* touch, Event* event)
 
 void ScrollView::onTouchEnded(Touch* touch, Event* event)
 {
+	// TODO
+	log("onTouchEnded");
+
     if (!this->isVisible())
     {
         return;
@@ -799,6 +826,11 @@ void ScrollView::onTouchEnded(Touch* touch, Event* event)
     {
         if (_touches.size() == 1 && _touchMoved)
         {
+			// Check if the last scrollDistance is below threshold - if so, clear it to zero to avoid kinetic scrolling
+			if (_scrollDistance.lengthSquared() < SCROLL_DEACCEL_THRESHOLD * SCROLL_DEACCEL_THRESHOLD) {
+				_scrollDistance = Vec2(0.f, 0.f);
+			}
+
             this->schedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
         }
         _touches.erase(touchIter);
@@ -813,6 +845,9 @@ void ScrollView::onTouchEnded(Touch* touch, Event* event)
 
 void ScrollView::onTouchCancelled(Touch* touch, Event* event)
 {
+	// TODO
+	log("onTouchCanceled");
+
     if (!this->isVisible())
     {
         return;
