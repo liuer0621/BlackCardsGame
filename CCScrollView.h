@@ -26,11 +26,15 @@
 #ifndef __CCSCROLLVIEW_H__
 #define __CCSCROLLVIEW_H__
 
+#include <vector>
+
 #include "2d/CCLayer.h"
 #include "base/CCEventListenerTouch.h"
 #include "2d/CCActionTween.h"
 #include "extensions/ExtensionMacros.h"
 #include "extensions/ExtensionExport.h"
+
+using std::vector;
 
 NS_CC_EXT_BEGIN
 
@@ -235,6 +239,10 @@ public:
     bool isClippingToBounds() { return _clippingToBounds; }
     void setClippingToBounds(bool bClippingToBounds) { _clippingToBounds = bClippingToBounds; }
 
+	// Set the predefined stops (in terms of offset values)
+	void setStopOffsetsX(const vector<float> &offsets);
+	float findClosestStopOffsetX(float offset);
+
     virtual bool onTouchBegan(Touch *touch, Event *event);
     virtual void onTouchMoved(Touch *touch, Event *event);
     virtual void onTouchEnded(Touch *touch, Event *event);
@@ -380,6 +388,11 @@ protected:
     
     CustomCommand _beforeDrawCommand;
     CustomCommand _afterDrawCommand;
+
+	// Predefined stop offsets
+	vector<float> _stopOffsetsX;
+
+	float estimateKineticStop(float pos, float initScrollDistance);
 };
 
 // end of GUI group

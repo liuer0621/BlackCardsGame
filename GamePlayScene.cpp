@@ -61,6 +61,7 @@ bool GamePlay::init()
     
     // TODO: avoid using MACRO
     const int numCards = CARDAMOUNT;
+	vector<float> stopOffsets(numCards);
     for (int i = 0; i < numCards; i++)
     {
         //add piece
@@ -69,6 +70,7 @@ bool GamePlay::init()
         card->setDelegate(this);
         this->WhiteCards.pushBack(card);
         scrollContainer->addChild(card);
+		stopOffsets[i] = -i * mCardXSpacing;
     }
     
     scrollContainer->setPosition(Point::ZERO);
@@ -82,6 +84,7 @@ bool GamePlay::init()
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
     scrollView->setDelegate(this);
     scrollView->setContentSize(csize);  // This seems necessary for kinetic scrolling to work
+	scrollView->setStopOffsetsX(stopOffsets);
     
     addChild(scrollView);
     
@@ -173,7 +176,7 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
         // and we shouldn't do anything
         if (offset.x > minOffset.x && offset.x < maxOffset.x) {
             // Move to the closest card. (Note: offset is negative)
-            moveToCard(-floorf(offset.x / mCardXSpacing + 0.5f), true);
+            //moveToCard(-floorf(offset.x / mCardXSpacing + 0.5f), true);
         }
         mSnapToPlace = false;
     }

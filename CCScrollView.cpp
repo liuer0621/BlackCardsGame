@@ -36,8 +36,8 @@
 
 NS_CC_EXT_BEGIN
 
-#define SCROLL_DEACCEL_RATE			0.95f
-#define SCROLL_DEACCEL_DIST			1.0f
+#define SCROLL_DEACCEL_RATE			0.9f
+#define SCROLL_DEACCEL_DIST			0.1f
 #define SCROLL_DEACCEL_THRESHOLD	5.0f	// This is necessary when the display resolution is small, because the smallest mouse movement might be large
 #define BOUNCE_DURATION      0.15f
 #define INSET_RATIO          0.2f
@@ -375,7 +375,8 @@ void ScrollView::relocateContainer(bool animated)
     
     oldPoint = _container->getPosition();
 
-    newX     = oldPoint.x;
+	// Snap to the closest X offset
+	newX     = findClosestStopOffsetX(oldPoint.x);
     newY     = oldPoint.y;
     if (_direction == Direction::BOTH || _direction == Direction::HORIZONTAL)
     {
@@ -439,8 +440,8 @@ void ScrollView::deaccelerateScrolling(float dt)
     _scrollDistance     = _scrollDistance * SCROLL_DEACCEL_RATE;
 	this->setContentOffset(Vec2(newX, newY));
     
-    if ((fabsf(_scrollDistance.x) <= SCROLL_DEACCEL_DIST &&
-         fabsf(_scrollDistance.y) <= SCROLL_DEACCEL_DIST) ||
+    if ((fabsf(_scrollDistance.x) < SCROLL_DEACCEL_DIST &&
+         fabsf(_scrollDistance.y) < SCROLL_DEACCEL_DIST) ||
         newY >= maxInset.y || newY <= minInset.y ||
         newX >= maxInset.x || newX <= minInset.x)
     {
@@ -448,12 +449,12 @@ void ScrollView::deaccelerateScrolling(float dt)
         log("deaccelerateScrolling: _animating = false");
         _animating = false;
 
+		this->relocateContainer(true);
+
 		// After the animation stopped, "scrollViewDidScroll" should be invoked
 		if (_delegate != nullptr) {
 			_delegate->scrollViewDidScroll(this);
 		}
-		
-        this->relocateContainer(true);	
 	}
 }
 
@@ -824,11 +825,23 @@ void ScrollView::onTouchEnded(Touch* touch, Event* event)
     
     if (touchIter != _touches.end())
     {
-        if (_touches.size() == 1 && _touchMoved)
-        {
+        if (_touches.size() == 1) 
+		{
 			// Check if the last scrollDistance is below threshold - if so, clear it to zero to avoid kinetic scrolling
 			if (_scrollDistance.lengthSquared() < SCROLL_DEACCEL_THRESHOLD * SCROLL_DEACCEL_THRESHOLD) {
 				_scrollDistance = Vec2(0.f, 0.f);
+			}
+
+			// Estimate the end of horizontal scroll
+			float posX = getContentOffset().x;
+			float endX = estimateKineticStop(posX, _scrollDistance.x);
+			if (endX < maxContainerOffset().x && endX > minContainerOffset().x) {
+				float closestStopX = findClosestStopOffsetX(endX);
+				// TODO
+				log("Estimated stop: %f, closest stop %f", endX, closestStopX);
+
+				// Adjust _scrollDistance to land on closest offset
+				_scrollDistance.x = (closestStopX - posX) * (1 - SCROLL_DEACCEL_RATE);
 			}
 
             this->schedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
@@ -898,6 +911,51 @@ bool ScrollView::isAnimating()
         return true;
     }
     return false;
+}
+
+void ScrollView::setStopOffsetsX(const vector<float> &offsets)
+{
+	_stopOffsetsX = offsets;
+	// Sort stop offsets from small to large
+	std::sort(_stopOffsetsX.begin(), _stopOffsetsX.end());
+}
+
+float ScrollView::findClosestStopOffsetX(float offset)
+{
+	if (_stopOffsetsX.empty()) {
+		return offset;	// If no stop offsets are set, return the offset itself
+	}
+
+	// Assume stop offsets are sorted from small to large
+	auto const it = std::lower_bound(_stopOffsetsX.begin(), _stopOffsetsX.end(), offset);
+	if (it == _stopOffsetsX.end()) {
+		// All stop offsets are smaller than offset - return the largest one
+		return _stopOffsetsX.back();
+	}
+	// Now "it" is the first stop offset greater than or equal to offset
+	auto prevIt = it;
+	if (it != _stopOffsetsX.begin()) {
+		--prevIt;
+	}
+	// Return the stop offset that is closer to the given offset
+	return *it - offset < offset - *prevIt ? *it : *prevIt;
+}
+
+float ScrollView::estimateKineticStop(float pos, float initScrollDistance)
+{
+	const float absInitScrollDistance = fabsf(initScrollDistance);
+	if (absInitScrollDistance > 0.f) {
+		int frames = (int)floorf(logf(SCROLL_DEACCEL_DIST / absInitScrollDistance) / logf(SCROLL_DEACCEL_RATE)) + 1;
+		if (frames > 0) {
+			return pos + initScrollDistance * ((1 - powf(SCROLL_DEACCEL_RATE, frames)) / (1 - SCROLL_DEACCEL_RATE));
+		} else {
+			// When initial scroll distance is already smaller than SCROLL_DEACCEL_DIST, deaccelerateScrolling() still applies it once
+			return pos + initScrollDistance;
+		}
+
+	} else {
+		return pos;
+	}
 }
 
 NS_CC_EXT_END
