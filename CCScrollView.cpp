@@ -180,7 +180,7 @@ void ScrollView::resume(Ref* sender)
 
 bool ScrollView::isTouchEnabled() const
 {
-	return _touchListener != nullptr;
+    return _touchListener != nullptr;
 }
 
 void ScrollView::setTouchEnabled(bool enabled)
@@ -209,8 +209,8 @@ void ScrollView::setTouchEnabled(bool enabled)
 
 void ScrollView::setContentOffset(Vec2 offset, bool animated/* = false*/)
 {
-	// TODO
-	log("setContentOffset: animated = %d", animated);
+    // TODO
+    log("setContentOffset: animated = %d", animated);
 
     if (animated)
     { //animate scrolling
@@ -375,8 +375,8 @@ void ScrollView::relocateContainer(bool animated)
     
     oldPoint = _container->getPosition();
 
-	// Snap to the closest X offset
-	newX     = findClosestStopOffsetX(oldPoint.x);
+    // Snap to the closest X offset
+    newX     = findClosestStopOffsetX(oldPoint.x);
     newY     = oldPoint.y;
     if (_direction == Direction::BOTH || _direction == Direction::HORIZONTAL)
     {
@@ -409,8 +409,8 @@ Vec2 ScrollView::minContainerOffset()
 
 void ScrollView::deaccelerateScrolling(float dt)
 {
-	// TODO
-	log("deaccelerateScrolling: _scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
+    // TODO
+    log("deaccelerateScrolling: _scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
 
     if (_dragging)
     {
@@ -438,7 +438,7 @@ void ScrollView::deaccelerateScrolling(float dt)
     newY = _container->getPosition().y;
     
     _scrollDistance     = _scrollDistance * SCROLL_DEACCEL_RATE;
-	this->setContentOffset(Vec2(newX, newY));
+    this->setContentOffset(Vec2(newX, newY));
     
     if ((fabsf(_scrollDistance.x) < SCROLL_DEACCEL_DIST &&
          fabsf(_scrollDistance.y) < SCROLL_DEACCEL_DIST) ||
@@ -449,18 +449,18 @@ void ScrollView::deaccelerateScrolling(float dt)
         log("deaccelerateScrolling: _animating = false");
         _animating = false;
 
-		this->relocateContainer(true);
+        this->relocateContainer(true);
 
-		// After the animation stopped, "scrollViewDidScroll" should be invoked
-		if (_delegate != nullptr) {
-			_delegate->scrollViewDidScroll(this);
-		}
-	}
+        // After the animation stopped, "scrollViewDidScroll" should be invoked
+        if (_delegate != nullptr) {
+            _delegate->scrollViewDidScroll(this);
+        }
+    }
 }
 
 void ScrollView::stoppedAnimatedScroll(Node * node)
 {
-	// TODO
+    // TODO
     log("stoppedAnimatedScroll: _animating = false");
     _animating = false;
     this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
@@ -475,7 +475,7 @@ void ScrollView::performedAnimatedScroll(float dt)
 {
     if (_dragging)
     {
-		// TODO
+        // TODO
         log("performedAnimatedScroll: _animating = false");
         _animating = false;
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
@@ -491,7 +491,7 @@ void ScrollView::performedAnimatedScroll(float dt)
 
 const Size& ScrollView::getContentSize() const
 {
-	return _container->getContentSize();
+    return _container->getContentSize();
 }
 
 void ScrollView::setContentSize(const Size & size)
@@ -499,21 +499,21 @@ void ScrollView::setContentSize(const Size & size)
     if (this->getContainer() != nullptr)
     {
         this->getContainer()->setContentSize(size);
-		this->updateInset();
+        this->updateInset();
     }
 }
 
 void ScrollView::updateInset()
 {
-	if (this->getContainer() != nullptr)
-	{
-		_maxInset = this->maxContainerOffset();
-		_maxInset = Vec2(_maxInset.x + _viewSize.width * INSET_RATIO,
-			_maxInset.y + _viewSize.height * INSET_RATIO);
-		_minInset = this->minContainerOffset();
-		_minInset = Vec2(_minInset.x - _viewSize.width * INSET_RATIO,
-			_minInset.y - _viewSize.height * INSET_RATIO);
-	}
+    if (this->getContainer() != nullptr)
+    {
+        _maxInset = this->maxContainerOffset();
+        _maxInset = Vec2(_maxInset.x + _viewSize.width * INSET_RATIO,
+            _maxInset.y + _viewSize.height * INSET_RATIO);
+        _minInset = this->minContainerOffset();
+        _minInset = Vec2(_minInset.x - _viewSize.width * INSET_RATIO,
+            _minInset.y - _viewSize.height * INSET_RATIO);
+    }
 }
 
 /**
@@ -554,7 +554,7 @@ void ScrollView::onBeforeDraw()
 {
     if (_clippingToBounds)
     {
-		_scissorRestored = false;
+        _scissorRestored = false;
         Rect frame = getViewRect();
         auto glview = Director::getInstance()->getOpenGLView();
 
@@ -627,8 +627,8 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
     if (!_children.empty())
     {
         int i=0;
-		
-		// draw children zOrder < 0
+        
+        // draw children zOrder < 0
         for( ; i < _children.size(); i++ )
         {
             Node *child = _children.at(i);
@@ -641,16 +641,16 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
                 break;
             }
         }
-		
-		// this draw
+        
+        // this draw
         if (visibleByCamera)
             this->draw(renderer, _modelViewTransform, flags);
         
         // draw children zOrder >= 0
         for( ; i < _children.size(); i++ )
         {
-			Node *child = _children.at(i);
-			child->visit(renderer, _modelViewTransform, flags);
+            Node *child = _children.at(i);
+            child->visit(renderer, _modelViewTransform, flags);
         }
     }
     else if (visibleByCamera)
@@ -665,8 +665,8 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
 
 bool ScrollView::onTouchBegan(Touch* touch, Event* event)
 {
-	// TODO
-	log("onTouchBegan");
+    // TODO
+    log("onTouchBegan");
 
     if (!this->isVisible() || !this->hasVisibleParents())
     {
@@ -711,8 +711,8 @@ bool ScrollView::onTouchBegan(Touch* touch, Event* event)
 
 void ScrollView::onTouchMoved(Touch* touch, Event* event)
 {
-	// TODO
-	log("onTouchMoved");
+    // TODO
+    log("onTouchMoved");
 
     if (!this->isVisible())
     {
@@ -798,8 +798,8 @@ void ScrollView::onTouchMoved(Touch* touch, Event* event)
                 _scrollDistance = moveDistance;
                 this->setContentOffset(Vec2(newX, newY));
 
-				// TODO
-				log("scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
+                // TODO
+                log("scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
             }
         }
         else if (_touches.size() == 2 && !_dragging)
@@ -813,8 +813,8 @@ void ScrollView::onTouchMoved(Touch* touch, Event* event)
 
 void ScrollView::onTouchEnded(Touch* touch, Event* event)
 {
-	// TODO
-	log("onTouchEnded");
+    // TODO
+    log("onTouchEnded");
 
     if (!this->isVisible())
     {
@@ -826,23 +826,23 @@ void ScrollView::onTouchEnded(Touch* touch, Event* event)
     if (touchIter != _touches.end())
     {
         if (_touches.size() == 1) 
-		{
-			// Check if the last scrollDistance is below threshold - if so, clear it to zero to avoid kinetic scrolling
-			if (_scrollDistance.lengthSquared() < SCROLL_DEACCEL_THRESHOLD * SCROLL_DEACCEL_THRESHOLD) {
-				_scrollDistance = Vec2(0.f, 0.f);
-			}
+        {
+            // Check if the last scrollDistance is below threshold - if so, clear it to zero to avoid kinetic scrolling
+            if (_scrollDistance.lengthSquared() < SCROLL_DEACCEL_THRESHOLD * SCROLL_DEACCEL_THRESHOLD) {
+                _scrollDistance = Vec2(0.f, 0.f);
+            }
 
-			// Estimate the end of horizontal scroll
-			float posX = getContentOffset().x;
-			float endX = estimateKineticStop(posX, _scrollDistance.x);
-			if (endX < maxContainerOffset().x && endX > minContainerOffset().x) {
-				float closestStopX = findClosestStopOffsetX(endX);
-				// TODO
-				log("Estimated stop: %f, closest stop %f", endX, closestStopX);
+            // Estimate the end of horizontal scroll
+            float posX = getContentOffset().x;
+            float endX = estimateKineticStop(posX, _scrollDistance.x);
+            if (endX < maxContainerOffset().x && endX > minContainerOffset().x) {
+                float closestStopX = findClosestStopOffsetX(endX);
+                // TODO
+                log("Estimated stop: %f, closest stop %f", endX, closestStopX);
 
-				// Adjust _scrollDistance to land on closest offset
-				_scrollDistance.x = (closestStopX - posX) * (1 - SCROLL_DEACCEL_RATE);
-			}
+                // Adjust _scrollDistance to land on closest offset
+                _scrollDistance.x = (closestStopX - posX) * (1 - SCROLL_DEACCEL_RATE);
+            }
 
             this->schedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
         }
@@ -858,8 +858,8 @@ void ScrollView::onTouchEnded(Touch* touch, Event* event)
 
 void ScrollView::onTouchCancelled(Touch* touch, Event* event)
 {
-	// TODO
-	log("onTouchCanceled");
+    // TODO
+    log("onTouchCanceled");
 
     if (!this->isVisible())
     {
@@ -915,47 +915,47 @@ bool ScrollView::isAnimating()
 
 void ScrollView::setStopOffsetsX(const vector<float> &offsets)
 {
-	_stopOffsetsX = offsets;
-	// Sort stop offsets from small to large
-	std::sort(_stopOffsetsX.begin(), _stopOffsetsX.end());
+    _stopOffsetsX = offsets;
+    // Sort stop offsets from small to large
+    std::sort(_stopOffsetsX.begin(), _stopOffsetsX.end());
 }
 
 float ScrollView::findClosestStopOffsetX(float offset)
 {
-	if (_stopOffsetsX.empty()) {
-		return offset;	// If no stop offsets are set, return the offset itself
-	}
+    if (_stopOffsetsX.empty()) {
+        return offset;	// If no stop offsets are set, return the offset itself
+    }
 
-	// Assume stop offsets are sorted from small to large
-	auto const it = std::lower_bound(_stopOffsetsX.begin(), _stopOffsetsX.end(), offset);
-	if (it == _stopOffsetsX.end()) {
-		// All stop offsets are smaller than offset - return the largest one
-		return _stopOffsetsX.back();
-	}
-	// Now "it" is the first stop offset greater than or equal to offset
-	auto prevIt = it;
-	if (it != _stopOffsetsX.begin()) {
-		--prevIt;
-	}
-	// Return the stop offset that is closer to the given offset
-	return *it - offset < offset - *prevIt ? *it : *prevIt;
+    // Assume stop offsets are sorted from small to large
+    auto const it = std::lower_bound(_stopOffsetsX.begin(), _stopOffsetsX.end(), offset);
+    if (it == _stopOffsetsX.end()) {
+        // All stop offsets are smaller than offset - return the largest one
+        return _stopOffsetsX.back();
+    }
+    // Now "it" is the first stop offset greater than or equal to offset
+    auto prevIt = it;
+    if (it != _stopOffsetsX.begin()) {
+        --prevIt;
+    }
+    // Return the stop offset that is closer to the given offset
+    return *it - offset < offset - *prevIt ? *it : *prevIt;
 }
 
 float ScrollView::estimateKineticStop(float pos, float initScrollDistance)
 {
-	const float absInitScrollDistance = fabsf(initScrollDistance);
-	if (absInitScrollDistance > 0.f) {
-		int frames = (int)floorf(logf(SCROLL_DEACCEL_DIST / absInitScrollDistance) / logf(SCROLL_DEACCEL_RATE)) + 1;
-		if (frames > 0) {
-			return pos + initScrollDistance * ((1 - powf(SCROLL_DEACCEL_RATE, frames)) / (1 - SCROLL_DEACCEL_RATE));
-		} else {
-			// When initial scroll distance is already smaller than SCROLL_DEACCEL_DIST, deaccelerateScrolling() still applies it once
-			return pos + initScrollDistance;
-		}
+    const float absInitScrollDistance = fabsf(initScrollDistance);
+    if (absInitScrollDistance > 0.f) {
+        int frames = (int)floorf(logf(SCROLL_DEACCEL_DIST / absInitScrollDistance) / logf(SCROLL_DEACCEL_RATE)) + 1;
+        if (frames > 0) {
+            return pos + initScrollDistance * ((1 - powf(SCROLL_DEACCEL_RATE, frames)) / (1 - SCROLL_DEACCEL_RATE));
+        } else {
+            // When initial scroll distance is already smaller than SCROLL_DEACCEL_DIST, deaccelerateScrolling() still applies it once
+            return pos + initScrollDistance;
+        }
 
-	} else {
-		return pos;
-	}
+    } else {
+        return pos;
+    }
 }
 
 NS_CC_EXT_END

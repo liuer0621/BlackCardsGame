@@ -61,7 +61,7 @@ bool GamePlay::init()
     
     // TODO: avoid using MACRO
     const int numCards = CARDAMOUNT;
-	vector<float> stopOffsets(numCards);
+    vector<float> stopOffsets(numCards);
     for (int i = 0; i < numCards; i++)
     {
         //add piece
@@ -70,7 +70,7 @@ bool GamePlay::init()
         card->setDelegate(this);
         this->WhiteCards.pushBack(card);
         scrollContainer->addChild(card);
-		stopOffsets[i] = -i * mCardXSpacing;
+        stopOffsets[i] = -i * mCardXSpacing;
     }
     
     scrollContainer->setPosition(Point::ZERO);
@@ -84,7 +84,7 @@ bool GamePlay::init()
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
     scrollView->setDelegate(this);
     scrollView->setContentSize(csize);  // This seems necessary for kinetic scrolling to work
-	scrollView->setStopOffsetsX(stopOffsets);
+    scrollView->setStopOffsetsX(stopOffsets);
     
     addChild(scrollView);
     
@@ -110,7 +110,7 @@ bool GamePlay::init()
 void GamePlay::menuCloseCallback(Ref* pSender)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
-	MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
+    MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
     return;
 #endif
 

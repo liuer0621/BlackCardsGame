@@ -194,7 +194,7 @@ public:
     void resume(Ref* sender);
 
     void setTouchEnabled(bool enabled);
-	bool isTouchEnabled() const;
+    bool isTouchEnabled() const;
     bool isDragging() const {return _dragging;}
     bool isAnimating();
     bool isTouchMoved() const { return _touchMoved; }
@@ -231,7 +231,7 @@ public:
      */
     void setDelegate(ScrollViewDelegate* pDelegate) { _delegate = pDelegate; }
 
-	void updateInset();
+    void updateInset();
 
     /**
      * Determines whether it clips its children or not.
@@ -239,9 +239,9 @@ public:
     bool isClippingToBounds() { return _clippingToBounds; }
     void setClippingToBounds(bool bClippingToBounds) { _clippingToBounds = bClippingToBounds; }
 
-	// Set the predefined stops (in terms of offset values)
-	void setStopOffsetsX(const vector<float> &offsets);
-	float findClosestStopOffsetX(float offset);
+    // Set the predefined stops (in terms of offset values)
+    void setStopOffsetsX(const vector<float> &offsets);
+    float findClosestStopOffsetX(float offset);
 
     virtual bool onTouchBegan(Touch *touch, Event *event);
     virtual void onTouchMoved(Touch *touch, Event *event);
@@ -389,10 +389,10 @@ protected:
     CustomCommand _beforeDrawCommand;
     CustomCommand _afterDrawCommand;
 
-	// Predefined stop offsets
-	vector<float> _stopOffsetsX;
+    // Predefined stop offsets
+    vector<float> _stopOffsetsX;
 
-	float estimateKineticStop(float pos, float initScrollDistance);
+    float estimateKineticStop(float pos, float initScrollDistance);
 };
 
 // end of GUI group
