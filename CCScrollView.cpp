@@ -38,7 +38,7 @@ NS_CC_EXT_BEGIN
 
 #define SCROLL_DEACCEL_RATE			0.9f
 #define SCROLL_DEACCEL_DIST			0.1f
-#define SCROLL_DEACCEL_THRESHOLD	5.0f	// This is necessary when the display resolution is small, because the smallest mouse movement might be large
+#define SCROLL_DEACCEL_THRESHOLD	0.0f	// This is necessary when the display resolution is small, because the smallest mouse movement might be large
 #define BOUNCE_DURATION      0.15f
 #define INSET_RATIO          0.2f
 #define MOVE_INCH            7.0f/160.0f

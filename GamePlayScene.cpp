@@ -100,7 +100,6 @@ bool GamePlay::init()
     addChild(BlackCardLayer);
     
     arrangeCards();
-    mSnapToPlace = false;
     mCardChosen = false;
     
     return true;
@@ -125,12 +124,6 @@ void GamePlay::menuCloseCallback(Ref* pSender)
 float unitHeightGaussian(float x, float sigma)
 {
     return expf(-x*x/(2*sigma*sigma));
-}
-
-void GamePlay::moveToCard(int index, bool animated)
-{
-    mCurrentCardIndex = index;
-    scrollView->setContentOffset(Point(-index * mCardXSpacing, 0.f), animated);
 }
 
 void GamePlay::arrangeCards(void)
@@ -167,24 +160,8 @@ void GamePlay::scrollViewDidScroll(ScrollView * view)
     // TODO
     log("scrollViewDidScroll, %d %d %f", view->isDragging(), view->isAnimating(), view->getContentOffset().x);
     
-    if (mSnapToPlace && !view->isDragging() && !view->isAnimating()) {
-        // When user finishes dragging, and we want to snap the scrollview to predefined places
-        Vec2 offset = view->getContentOffset();
-        Vec2 maxOffset = view->maxContainerOffset(),
-             minOffset = view->minContainerOffset();
-        // Check if the current offset is within the min/max boundary; if not, ScrollView will handle that by bounce
-        // and we shouldn't do anything
-        if (offset.x > minOffset.x && offset.x < maxOffset.x) {
-            // Move to the closest card. (Note: offset is negative)
-            //moveToCard(-floorf(offset.x / mCardXSpacing + 0.5f), true);
-        }
-        mSnapToPlace = false;
-    }
-    
-    if(view->isDragging() && cardsAreDraggable()) {
-        // Whenever the user is dragging, we turn on "snap to place" at the end of draggin
-        mSnapToPlace = true;
-    }
+    mCurrentCardIndex = (int)-floorf(view->getContentOffset().x / mCardXSpacing + 0.5f);
+    mCurrentCardIndex = std::max(std::min(mCurrentCardIndex, CARDAMOUNT-1), 0);
     
     arrangeCards();
 }
@@ -203,11 +180,17 @@ void GamePlay::cardDidSubmit(Card *card)
 
 bool GamePlay::cardIsMovable(const Card *card)
 {
-    // TODO: we should make sure card is not movable when there is scrolling animation
-    return (card == WhiteCards.at(mCurrentCardIndex));
+    // TODO: might not need this anymore
+    return true;
 }
 
 bool GamePlay::cardsAreDraggable(void)
 {
     return !mCardChosen;
+}
+
+void GamePlay::moveToCard(int index, bool animated)
+{
+    mCurrentCardIndex = index;
+    scrollView->setContentOffset(Point(-index * mCardXSpacing, 0.f), animated);
 }
