@@ -324,11 +324,6 @@ protected:
     bool _dragging;
     
     /**
-     * If YES, the view is being animated: either deaccelerating or moving to a specified target.
-     */
-    bool _animating;
-
-    /**
      * Content offset. Note that left-bottom point is the origin
      */
     Vec2 _contentOffset;

@@ -39,7 +39,7 @@ NS_CC_EXT_BEGIN
 #define SCROLL_DEACCEL_RATE			0.9f
 #define SCROLL_DEACCEL_DIST			0.1f
 #define SCROLL_DEACCEL_THRESHOLD	0.0f	// This is necessary when the display resolution is small, because the smallest mouse movement might be large
-#define BOUNCE_DURATION      0.15f
+#define BOUNCE_DURATION      1.f // TODO: 0.15f
 #define INSET_RATIO          0.2f
 #define MOVE_INCH            7.0f/160.0f
 #define BOUNCE_BACK_FACTOR   0.35f
@@ -56,7 +56,6 @@ ScrollView::ScrollView()
 : _delegate(nullptr)
 , _direction(Direction::BOTH)
 , _dragging(false)
-, _animating(false)
 , _container(nullptr)
 , _touchMoved(false)
 , _bounceable(false)
@@ -203,7 +202,6 @@ void ScrollView::setTouchEnabled(bool enabled)
         _dragging = false;
         _touchMoved = false;
         _touches.clear();
-        _animating = false;
     }
 }
 
@@ -244,7 +242,6 @@ void ScrollView::setContentOffsetInDuration(Vec2 offset, float dt)
     expire = CallFuncN::create(CC_CALLBACK_1(ScrollView::stoppedAnimatedScroll,this));
     _container->runAction(Sequence::create(scroll, expire, nullptr));
     this->schedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
-    _animating = true;
 }
 
 Vec2 ScrollView::getContentOffset()
@@ -308,8 +305,6 @@ void ScrollView::setZoomScaleInDuration(float s, float dt)
             ActionTween *scaleAction;
             scaleAction = ActionTween::create(dt, "zoomScale", _container->getScale(), s);
             this->runAction(scaleAction);
-            // TODO: ideally zooming animation should also set _animating to true; however, currently I have no way
-            //       to know when this action is ending
         }
     }
     else
@@ -412,9 +407,8 @@ void ScrollView::deaccelerateScrolling(float dt)
     // TODO
     log("deaccelerateScrolling: _scrollDistance = (%f, %f)", _scrollDistance.x, _scrollDistance.y);
 
-    if (_dragging)
-    {
-        this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
+    if (_dragging) {
+        // Does nothing when dragging. onTouchBegan() should unschedule this upon start dragging
         return;
     }
     
@@ -446,8 +440,7 @@ void ScrollView::deaccelerateScrolling(float dt)
         newX >= maxInset.x || newX <= minInset.x)
     {
         this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
-        log("deaccelerateScrolling: _animating = false");
-        _animating = false;
+        log("deaccelerateScrolling: end");
 
         this->relocateContainer(true);
 
@@ -461,8 +454,7 @@ void ScrollView::deaccelerateScrolling(float dt)
 void ScrollView::stoppedAnimatedScroll(Node * node)
 {
     // TODO
-    log("stoppedAnimatedScroll: _animating = false");
-    _animating = false;
+    log("stoppedAnimatedScroll");
     this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
     // After the animation stopped, "scrollViewDidScroll" should be invoked, this could fix the bug of lack of tableview cells.
     if (_delegate != nullptr)
@@ -476,9 +468,8 @@ void ScrollView::performedAnimatedScroll(float dt)
     if (_dragging)
     {
         // TODO
-        log("performedAnimatedScroll: _animating = false");
-        _animating = false;
-        this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
+        log("performedAnimatedScroll: stopped");
+        // Does nothing when dragging. onTouchBegan() should unschedule this upon start dragging
         return;
     }
 
@@ -677,7 +668,7 @@ bool ScrollView::onTouchBegan(Touch* touch, Event* event)
 
     //dispatcher does not know about clipping. reject touches outside visible bounds.
     if (_touches.size() > 2 ||
-        _touchMoved          ||
+        _touchMoved         ||
         !frame.containsPoint(touch->getLocation()))
     {
         return false;
@@ -689,7 +680,14 @@ bool ScrollView::onTouchBegan(Touch* touch, Event* event)
     }
 
     if (_touches.size() == 1)
-    { // scrolling
+    {
+        // Scrolling
+        // Unschedule ongoing deacceleration (if exists)
+        this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::deaccelerateScrolling));
+        // Unschedule ongoing animation (if exists), and stop all actions
+        this->unschedule(CC_SCHEDULE_SELECTOR(ScrollView::performedAnimatedScroll));
+        _container->stopAllActions();
+        
         _touchPoint     = this->convertTouchToNodeSpace(touch);
         _touchMoved     = false;
         _dragging     = true; //dragging started
