@@ -5,6 +5,10 @@
 #include "Card.h"
 #include "cocos-ext.h"
 
+#ifdef USE_LOCAL_CCSCROLLVIEW
+#include "CCScrollView.h"
+#endif
+
 using namespace cocos2d;
 using namespace extension;
 

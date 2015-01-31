@@ -36,6 +36,11 @@
 
 using std::vector;
 
+#ifdef USE_LOCAL_CCSCROLLVIEW
+#undef CC_EX_DLL
+#define CC_EX_DLL
+#endif
+
 NS_CC_EXT_BEGIN
 
 /**
