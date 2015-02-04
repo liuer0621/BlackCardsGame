@@ -77,8 +77,10 @@ bool GamePlay::init()
     Size csize = Size(mHalfViewWidth*2 + (numCards-1)*mCardXSpacing, visibleSize.height);
     scrollContainer->setContentSize(csize);
     
-    //SETUP SCROLL VIEW
-    scrollView = ScrollView::create(visibleSize, scrollContainer);
+    // Setup ScrollView
+    // The ScrollView spans full view width, and are high enough to contain the card with maximum Y offset
+    Size scrollViewSize(visibleSize.width, mCardYBase + mCardMaxYOffset + 0.5f * mCardHeight);
+    scrollView = ScrollView::create(scrollViewSize, scrollContainer);
     moveToCard(numCards/2, false);
     scrollView->setPosition(Point::ZERO);
     scrollView->setDirection(ScrollView::Direction::HORIZONTAL);
@@ -101,6 +103,10 @@ bool GamePlay::init()
     
     arrangeCards();
     mCardChosen = false;
+    
+    // TODO: test, might not needed
+    setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
+    setTouchEnabled(true);
     
     return true;
 }
@@ -172,21 +178,45 @@ void GamePlay::cardDidSubmit(Card *card)
     //       to convert it to world space, and then convert it to GamePlay's space
     Vec2 pt = convertToNodeSpace(scrollContainer->convertToWorldSpace(card->getPosition()));
     if (mSubmitRegion.containsPoint(pt)) {
+        log("cardDidSubmit(): submit"); // TODO
+        
+        // Move the selected card to BlackCardLayer
+        
         card->fadeOut();
+        // Interesting: scrollView itself can still run action on itself when it's paused
+        scrollView->runAction(MoveTo::create(1.f, Vec2(0.f, -mCardHeight)));
+        
     } else {
+        log("cardDidSubmit(): pull back"); // TODO
         card->pullBack();
+        scrollView->resume();
     }
 }
 
 bool GamePlay::cardIsMovable(const Card *card)
 {
-    // TODO: might not need this anymore
-    return true;
+    return WhiteCards.at(mCurrentCardIndex) == card;
 }
 
 bool GamePlay::cardsAreDraggable(void)
 {
     return !mCardChosen;
+}
+
+void GamePlay::cardIsSelected(Card *card)
+{
+    scrollView->pause();
+}
+
+bool GamePlay::onTouchBegan(Touch *touch, Event *event)
+{
+    Rect rect(0, 0, 20, 20);
+    log("%f, %f", touch->getLocation().x, touch->getLocation().y);
+    if (rect.containsPoint(touch->getLocation())) {
+        log("lala");
+    }
+    
+    return true;
 }
 
 void GamePlay::moveToCard(int index, bool animated)

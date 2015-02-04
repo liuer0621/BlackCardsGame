@@ -26,7 +26,11 @@ private:
     bool mCardChosen;
     int mCurrentCardIndex;
     
-    cocos2d::Vector<Card *> WhiteCards;
+    // Nodes
+    Vector<Card *> WhiteCards;
+    ScrollView *scrollView;
+    Layer *scrollContainer;
+    Layer *BlackCardLayer;
     
     void moveToCard(int index, bool animated);
     void arrangeCards(void);
@@ -46,16 +50,14 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(GamePlay);
     
-    //for Scrollview
-    ScrollView *scrollView;
-    Layer *scrollContainer;
-    Layer *BlackCardLayer;
-    
     virtual void scrollViewDidScroll(ScrollView * view);
     virtual void scrollViewDidZoom(ScrollView * view){};
     
     void cardDidSubmit(Card *card);
     bool cardIsMovable(const Card *card);
+    void cardIsSelected(Card *card);
+    
+    bool onTouchBegan(Touch *touch, Event *event);
     
     void menuCallBack(Ref *sender);
 };

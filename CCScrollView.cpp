@@ -656,9 +656,6 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
 
 bool ScrollView::onTouchBegan(Touch* touch, Event* event)
 {
-    // TODO
-    log("onTouchBegan");
-
     if (!this->isVisible() || !this->hasVisibleParents())
     {
         return false;
@@ -673,6 +670,9 @@ bool ScrollView::onTouchBegan(Touch* touch, Event* event)
     {
         return false;
     }
+    
+    // TODO
+    log("ScrollView::onTouchBegan");
 
     if (std::find(_touches.begin(), _touches.end(), touch) == _touches.end())
     {
